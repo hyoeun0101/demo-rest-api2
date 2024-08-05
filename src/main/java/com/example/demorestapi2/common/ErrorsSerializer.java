@@ -13,32 +13,38 @@ public class ErrorsSerializer extends JsonSerializer<Errors> {
 
     @Override
     public void serialize(Errors errors, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
-        // 필드 네임
+
+        // { "errors" : [ {"field" : "", "objectName: "", ...}, {"field" : "", "objectName: "", ...}, ...] }
+        jsonGenerator.writeStartObject();
         jsonGenerator.writeFieldName("errors");
         jsonGenerator.writeStartArray();
-
-        errors.getFieldErrors().forEach(error -> {
+        errors.getFieldErrors().forEach(err -> {
             try {
                 jsonGenerator.writeStartObject();
-
-                jsonGenerator.writeStringField("field", error.getField());
-                jsonGenerator.writeStringField("objectName", error.getObjectName());
-                jsonGenerator.writeStringField("code", error.getCode());
-                jsonGenerator.writeStringField("defaultMessage", error.getDefaultMessage());
-
-
-
+                jsonGenerator.writeStringField("field",err.getField());
+                jsonGenerator.writeStringField("objectName",err.getObjectName());
+                jsonGenerator.writeStringField("code",err.getCode());
+                jsonGenerator.writeStringField("defaultMessage",err.getDefaultMessage());
+                jsonGenerator.writeEndObject();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
+        errors.getGlobalErrors().forEach(err -> {
+            try {
+                jsonGenerator.writeStartObject();
+                jsonGenerator.writeStringField("objectName",err.getObjectName());
+                jsonGenerator.writeStringField("code",err.getCode());
+                jsonGenerator.writeStringField("defaultMessage",err.getDefaultMessage());
 
                 jsonGenerator.writeEndObject();
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
-
-
         });
-
-
-
         jsonGenerator.writeEndArray();
+
+        jsonGenerator.writeEndObject();
+
     }
 }
